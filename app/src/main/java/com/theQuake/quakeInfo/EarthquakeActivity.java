@@ -42,6 +42,7 @@ import com.mikepenz.materialize.color.Material;
 
 
 import java.io.IOException;
+import java.sql.Struct;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -167,8 +168,6 @@ public class EarthquakeActivity extends AppCompatActivity implements SharedPrefe
         getSupportLoaderManager().initLoader(EARTHQUAKE_LOADER_ID, null, this);
 
     }
-
-
 
     /*Code to launch About activity */
     public void initAboutActivity()
@@ -323,7 +322,7 @@ public class EarthquakeActivity extends AppCompatActivity implements SharedPrefe
     /**
      * method to show results
      */
-    private void showResults(List<Earthquake> earthquakeList) {
+    public void showResults(List<Earthquake> earthquakeList) {
         mAdapter.clear();
         earthquakeListView.setVisibility(View.VISIBLE);
         mEmptyStateTextView.setVisibility(View.GONE);
@@ -335,7 +334,7 @@ public class EarthquakeActivity extends AppCompatActivity implements SharedPrefe
     /**
      * method to hide results also checks internet connection
      */
-    private void hideResults() {
+    public void hideResults() {
         earthquakeListView.setVisibility(View.GONE);
         mEmptyStateTextView.setVisibility(View.VISIBLE);
         // Get a reference to the ConnectivityManager to check state of network connectivity
@@ -398,13 +397,14 @@ public class EarthquakeActivity extends AppCompatActivity implements SharedPrefe
         }
         return super.onOptionsItemSelected(item);
     }
+
     @Override
     public void onRefresh() {
         getSupportLoaderManager().restartLoader(EARTHQUAKE_LOADER_ID, null, this);
         Toast.makeText(this, R.string.list_refreshed, Toast.LENGTH_SHORT).show();
     }
 
-    private void setUpDrawer(int backgroundColor, int textColor, int iconColor, int selectedTextColor) {
+    public void setUpDrawer(int backgroundColor, int textColor, int iconColor, int selectedTextColor) {
         PrimaryDrawerItem item1 = new PrimaryDrawerItem().withIdentifier(R.id.action_did_you_feel_it).withName(R.string.did_you_feel_it).withIcon(R.drawable.ic_feel_it).withTextColor(textColor).withSelectedTextColor(selectedTextColor).withIconTintingEnabled(true).withIconColor(iconColor).withSelectedBackgroundAnimated(false);
         PrimaryDrawerItem item2 = new PrimaryDrawerItem().withIdentifier(R.id.action_more_apps).withName(R.string.more_apps).withIcon(R.drawable.ic_more_apps).withTextColor(textColor).withSelectedTextColor(selectedTextColor).withIconTintingEnabled(true).withIconColor(iconColor);
         PrimaryDrawerItem item3 = new PrimaryDrawerItem().withIdentifier(R.id.fork_project).withName(R.string.fork_on_github).withIcon(R.drawable.ic_fork_project).withTextColor(textColor).withSelectedTextColor(selectedTextColor).withIconTintingEnabled(true).withIconColor(iconColor);
@@ -472,11 +472,53 @@ public class EarthquakeActivity extends AppCompatActivity implements SharedPrefe
             super.onBackPressed();
     }
 
-    private String getCurrentTheme() {
+    public float getAverageMagnitude(List<Float> magnitudes) {
+        float countMagnitudes = 0f;
+        float countItems = 0f;
+        for (int i = 0; i < magnitudes.size(); i++) {
+            countMagnitudes += magnitudes.get(i);
+            countItems++;
+        }
+        if (countItems > 0) {
+            return countMagnitudes / countItems;
+        }
+        else {
+            return 0;
+        }
+    }
+
+    public float getMaxMagnitude(List<Float> magnitudes) {
+        float maxMagnitude = 0f;
+        for (int i = 0; i < magnitudes.size(); i++) {
+            if (maxMagnitude < magnitudes.get(i)) {
+                maxMagnitude = magnitudes.get(i);
+            }
+        }
+        return maxMagnitude;
+    }
+
+    public String getUpdatedQuakeLocations(List<String> selectedList, String location) {
+        if (!selectedList.contains(location)) {
+            selectedList.add(location);
+            //Toast.makeText(this, "Success", Toast.LENGTH_SHORT).show();
+            return "New earthquake location :" + location + ". Current locations = " + selectedList.size();
+        }
+        else {
+            return "Location already exists in the list";
+        }
+    }
+
+    public String getCurrentTheme() {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+
+        /*Toast.makeText(this, sharedPreferences.getString(
+                getString(R.string.settings_dark_theme),
+                getString(R.string.settings_dark_theme_off)), Toast.LENGTH_SHORT).show();*/
+
         return sharedPreferences.getString(
                 getString(R.string.settings_dark_theme),
                 getString(R.string.settings_dark_theme_off));
+
     }
 
 }
